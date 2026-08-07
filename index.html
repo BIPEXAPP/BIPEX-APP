@@ -37,7 +37,6 @@
     color: var(--texto);
   }
 
-  /* ---------- Header ---------- */
   header.app-header{
     background: linear-gradient(120deg, var(--laranja-escuro), var(--laranja) 65%);
     color: #fff;
@@ -69,7 +68,6 @@
   }
   .status-dot{ width:8px;height:8px;border-radius:50%; background:#8CFF9E; box-shadow: 0 0 6px #8CFF9E;}
 
-  /* ---------- Tabs ---------- */
   nav.tabs{
     display:flex;
     gap: 4px;
@@ -104,7 +102,6 @@
   h2.view-title{ margin: 0 0 4px; font-size: 18px; color: var(--laranja-escuro);}
   p.view-sub{ margin: 0 0 18px; font-size: 13px; color: var(--texto-suave); }
 
-  /* ---------- Cards / panels ---------- */
   .card{
     background: var(--branco);
     border-radius: 14px;
@@ -114,7 +111,6 @@
     border: 1px solid #F1E0D2;
   }
 
-  /* ---------- Scan bar ---------- */
   .scan-bar{
     display:flex;
     gap: 12px;
@@ -173,7 +169,6 @@
   .btn-danger:hover{ background:#FDECEA; }
   .btn-sm{ padding: 7px 11px; font-size:12px; border-radius:8px; }
 
-  /* ---------- Toolbar (search/filter/export) ---------- */
   .toolbar{
     display:flex;
     gap:10px;
@@ -200,7 +195,6 @@
     font-weight:700;
   }
 
-  /* ---------- Table ---------- */
   .table-wrap{
     overflow-x:auto;
     border-radius: 12px;
@@ -210,7 +204,7 @@
     width:100%;
     border-collapse: collapse;
     font-size: 12.8px;
-    min-width: 1180px;
+    min-width: 1500px;
   }
   thead th{
     background: var(--laranja);
@@ -275,7 +269,6 @@
   }
   .icon-btn:hover{ background:#FDECEA; }
 
-  /* ---------- Resumo cards ---------- */
   .resumo-grid{
     display:grid;
     grid-template-columns: repeat(auto-fit, minmax(210px,1fr));
@@ -287,6 +280,11 @@
     color: #4A3626;
     box-shadow: var(--sombra);
     border: 1px solid rgba(0,0,0,.04);
+    transition: transform .12s ease, box-shadow .12s ease;
+  }
+  .resumo-card[data-status]:hover, .resumo-card[data-prazo]:hover{
+    transform: translateY(-3px);
+    box-shadow: var(--sombra-forte);
   }
   .resumo-card .num{ font-size: 30px; font-weight:800; line-height:1; }
   .resumo-card .lbl{ font-size: 12.5px; font-weight:700; margin-top:6px; opacity:.85; }
@@ -296,7 +294,6 @@
   }
   .resumo-total .lbl{ color:#fff; opacity:.9; }
 
-  /* ---------- Instruções ---------- */
   .instr-item{ margin-bottom:18px; }
   .instr-item h3{ margin:0 0 5px; font-size:14.5px; color: var(--laranja-escuro); }
   .instr-item p{ margin:0; font-size:13.5px; line-height:1.55; color: var(--texto); }
@@ -312,7 +309,6 @@
     vertical-align:middle;
   }
 
-  /* ---------- Base import ---------- */
   .import-grid{
     display:grid;
     grid-template-columns: 1.3fr 1fr;
@@ -347,7 +343,6 @@
   }
   .hint{ font-size:12px; color: var(--texto-suave); margin-top:8px; line-height:1.5;}
 
-  /* ---------- Toasts ---------- */
   #toastHost{
     position: fixed;
     bottom: 22px;
@@ -378,7 +373,6 @@
   ::-webkit-scrollbar-thumb{ background: var(--borda); border-radius: 6px; }
   ::-webkit-scrollbar-track{ background: transparent; }
 
-  /* ---------- Camera scan modal ---------- */
   .camera-modal{
     position: fixed;
     inset: 0;
@@ -460,7 +454,6 @@
 
 <main>
 
-  <!-- ===================== BIPAGEM ===================== -->
   <section class="view active" id="view-bipagem">
     <h2 class="view-title">Bipagem de devoluções</h2>
     <p class="view-sub">Clique no campo abaixo e bipe a etiqueta — ele volta a ficar pronto pra próxima leitura sozinho.</p>
@@ -477,11 +470,12 @@
     </div>
 
     <div class="toolbar">
-      <input type="text" id="searchInput" placeholder="🔎 Buscar por ID, loja ou observação...">
+      <input type="text" id="searchInput" placeholder="🔎 Buscar por ID, produto, loja ou observação...">
       <select id="filterStatus">
         <option value="">Todos os status</option>
       </select>
       <span class="count-chip" id="countChip">0 registros</span>
+      <span class="count-chip" id="prazoChip" style="display:none; background:#FFB570; color:#663C00;"></span>
       <div class="spacer"></div>
       <button class="btn btn-ghost btn-sm" id="btnExportCsv">⬇️ Exportar CSV</button>
       <button class="btn btn-ghost btn-sm" id="btnBackup">💾 Backup (.json)</button>
@@ -495,14 +489,16 @@
           <tr>
             <th style="width:42px;">Nº</th>
             <th style="width:150px;">ID Pedido</th>
+            <th style="width:170px;">Produto</th>
             <th style="width:96px;">Data</th>
+            <th style="width:150px;">Prazo (3 dias)</th>
             <th style="width:150px;">Loja</th>
             <th style="width:170px;">Ocorrido</th>
-            <th style="width:150px;">Disputa Status</th>
+            <th style="width:190px;">Disputa Status</th>
             <th style="width:140px;">Resposta após 1 mês</th>
             <th style="width:110px;">Finalização</th>
             <th style="width:140px;">Pagamento</th>
-            <th style="width:170px;">Status Geral</th>
+            <th style="width:190px;">Status Geral</th>
             <th style="width:170px;">Observação</th>
             <th style="width:36px;"></th>
           </tr>
@@ -512,7 +508,6 @@
     </div>
   </section>
 
-  <!-- ===================== LOJAS ===================== -->
   <section class="view" id="view-lojas">
     <h2 class="view-title">Minhas lojas</h2>
     <p class="view-sub">Cadastre até 5 lojas — elas aparecem nos dropdowns de Loja na Bipagem e na Base de Pedidos.</p>
@@ -537,7 +532,6 @@
     </div>
   </section>
 
-  <!-- ===================== BASE DE PEDIDOS ===================== -->
   <section class="view" id="view-base">
     <h2 class="view-title">Base de pedidos (referência Shopee)</h2>
     <p class="view-sub">Importe aqui os pedidos exportados da Central do Vendedor pra Loja e Data se preencherem sozinhas ao bipar.</p>
@@ -597,14 +591,12 @@
     </div>
   </section>
 
-  <!-- ===================== RESUMO ===================== -->
   <section class="view" id="view-resumo">
     <h2 class="view-title">Resumo</h2>
     <p class="view-sub">Atualiza sozinho conforme você bipa e preenche os status.</p>
     <div class="resumo-grid" id="resumoGrid"></div>
   </section>
 
-  <!-- ===================== INSTRUÇÕES ===================== -->
   <section class="view" id="view-instrucoes">
     <h2 class="view-title">Como usar</h2>
     <div class="card">
@@ -618,7 +610,7 @@
         <h3>2. Bipagem automática</h3>
         <p>Vá na aba <b>Bipagem</b>, clique no campo laranja e escaneie o código de barras da etiqueta de
         devolução. O leitor digita o código e aperta Enter sozinho — o pedido entra na lista na hora, com a
-        DATA já preenchida, e o campo fica pronto pro próximo bipe.</p>
+        DATA já preenchida e um bipe de confirmação, e o campo fica pronto pro próximo bipe.</p>
       </div>
       <div class="instr-item">
         <h3>3. Bipar pela câmera do celular</h3>
@@ -631,12 +623,13 @@
       <div class="instr-item">
         <h3>4. Adicionar manualmente</h3>
         <p>Sem a etiqueta em mãos? Digite o ID do pedido no mesmo campo e aperte Enter, ou clique em
-        "+ Adicionar". Funciona igual ao bipe.</p>
+        "+ Adicionar". Funciona igual ao bipe. Depois é só preencher o campo <b>Produto</b> na tabela com o
+        nome do item que voltou.</p>
       </div>
       <div class="instr-item">
         <h3>5. Pedido repetido</h3>
-        <p>Se você bipar um pedido que já está na lista, o app não duplica — ele avisa e destaca a linha já
-        existente, pra você continuar de onde parou.</p>
+        <p>Se você bipar um pedido que já está na lista, o app não duplica — ele toca um som diferente (de
+        "negado"), avisa e destaca a linha já existente, pra você continuar de onde parou.</p>
       </div>
       <div class="instr-item">
         <h3>6. Loja e data automáticas</h3>
@@ -648,15 +641,34 @@
         <h3>7. Status da disputa</h3>
         <p>As colunas Ocorrido, Disputa Status, Resposta após 1 mês, Finalização e Pagamento são preenchidas
         por você, pelo dropdown, conforme o caso anda. Isso não vem de nenhuma exportação — só existe depois
-        que você acompanha o processo.</p>
+        que você acompanha o processo. Em Disputa Status existe a opção <b>"Disputa não aberta - devolução
+        correta"</b>, pra quando o cliente devolveu certinho e só falta reembolsar, sem precisar abrir
+        disputa nenhuma — mesmo assim o pedido fica registrado e controlado.</p>
       </div>
       <div class="instr-item">
-        <h3>8. Status Geral automático</h3>
+        <h3>8. Alerta de prazo (3 dias)</h3>
+        <p>A Shopee dá 3 dias corridos após a devolução pra você abrir disputa — depois disso, a
+        possibilidade se encerra. Por isso, todo pedido que ainda não teve nenhuma ação de disputa mostra
+        uma coluna <b>Prazo</b> na Bipagem: verde enquanto está tranquilo, laranja quando falta 1 dia ou
+        menos, e vermelho ("PRAZO ENCERRADO") quando o prazo já passou. Assim que você escolhe qualquer
+        opção em Disputa Status, o prazo some daquele pedido (já foi resolvido). A aba <b>Resumo</b> também
+        mostra dois cartões de alerta no topo — toque neles pra ver só os pedidos urgentes ou já
+        encerrados.</p>
+      </div>
+      <div class="instr-item">
+        <h3>9. Status Geral automático</h3>
         <p>Calculado sozinho a partir das colunas acima: PAGO, NÃO PAGO APÓS 1 MÊS, REJEITADO, APROVADO -
-        AGUARDANDO PAGAMENTO, SEM RESPOSTA APÓS 1 MÊS, EM ANDAMENTO ou A VERIFICAR.</p>
+        AGUARDANDO PAGAMENTO, DISPUTA NÃO ABERTA - REEMBOLSAR, SEM RESPOSTA APÓS 1 MÊS, EM ANDAMENTO ou A
+        VERIFICAR.</p>
       </div>
       <div class="instr-item">
-        <h3>9. Seus dados ficam salvos aqui</h3>
+        <h3>10. Resumo clicável</h3>
+        <p>Na aba <b>Resumo</b>, toque em qualquer cartão de status (ex: "A VERIFICAR") pra ver a lista
+        completa dos pedidos daquele status — com ID, produto, data, loja e tudo mais, direto na aba
+        Bipagem já filtrada.</p>
+      </div>
+      <div class="instr-item">
+        <h3>11. Seus dados ficam salvos aqui</h3>
         <p>Tudo é gravado automaticamente no navegador deste computador (não precisa internet, não vai pra
         nenhum servidor). Use o botão <b>Backup (.json)</b> de vez em quando pra salvar uma cópia de segurança
         num arquivo — e <b>Restaurar backup</b> se precisar recuperar ou levar os dados pra outro computador.</p>
@@ -689,16 +701,13 @@
 </div>
 
 <script>
-/* =========================================================
-   CONSTANTES / OPÇÕES (mesmas listas da planilha original)
-   ========================================================= */
 const LOJAS_MAXIMO = 5;
 const OCORRIDO_OPTIONS = [
   "Cliente solicitou de forma incorreta", "Produto difetente", "Pedido danificado (FULL)",
   "Devolvido Faltando Itens", "Não devolveu o produto", "produto devolvido danificado",
   "enviado errado pelo Full", "produto não enviado/não foi devolvido."
 ];
-const DISPUTA_OPTIONS = ["Aberta solicitação Shopee", "Aberta solicitação E-mail"];
+const DISPUTA_OPTIONS = ["Aberta solicitação Shopee", "Aberta solicitação E-mail", "Disputa não aberta - devolução correta"];
 const RESPOSTA_OPTIONS = ["RESPONDIDO", "NÃO RESPONDIDO APÓS 1 MÊS"];
 const FINALIZACAO_OPTIONS = ["APROVADA", "REJEITADA"];
 const PAGAMENTO_OPTIONS = ["PAGO EM CARTEIRA", "NÃO PAGO (1MÊS)"];
@@ -706,6 +715,7 @@ const PAGAMENTO_OPTIONS = ["PAGO EM CARTEIRA", "NÃO PAGO (1MÊS)"];
 const STATUS_COLORS = {
   "A VERIFICAR":                      { bg:"#FFD966", fg:"#663C00" },
   "EM ANDAMENTO":                     { bg:"#FBD9B7", fg:"#663C00" },
+  "DISPUTA NÃO ABERTA - REEMBOLSAR":  { bg:"#9FD8D3", fg:"#0B4F49" },
   "SEM RESPOSTA APÓS 1 MÊS":          { bg:"#F4A462", fg:"#663C00" },
   "APROVADO - AGUARDANDO PAGAMENTO":  { bg:"#FFB570", fg:"#663C00" },
   "REJEITADO":                        { bg:"#C0392B", fg:"#FFFFFF" },
@@ -718,20 +728,15 @@ const STORAGE_KEY_REG   = "devolucoes_registros_v1";
 const STORAGE_KEY_BASE  = "devolucoes_base_v1";
 const STORAGE_KEY_LOJAS = "devolucoes_lojas_v1";
 
-/* =========================================================
-   ESTADO
-   ========================================================= */
-let registros = [];   // {id, idPedido, dataISO, loja, ocorrido, disputa, resposta, finalizacao, pagamento, observacao, criadoEm}
-let base = [];         // {idPedido, loja, dataISO}
-let lojas = [];        // ["NOME DA LOJA", ...] — até 5, começa vazio
+let registros = [];
+let base = [];
+let lojas = [];
+let filtroPrazo = null;
 
 function uid(){
   return (crypto.randomUUID) ? crypto.randomUUID() : 'r'+Date.now()+Math.random().toString(16).slice(2);
 }
 
-/* =========================================================
-   PERSISTÊNCIA
-   ========================================================= */
 function loadData(){
   try{
     registros = JSON.parse(localStorage.getItem(STORAGE_KEY_REG) || "[]");
@@ -753,9 +758,6 @@ function saveLojas(){
   localStorage.setItem(STORAGE_KEY_LOJAS, JSON.stringify(lojas));
 }
 
-/* =========================================================
-   LÓGICA DE NEGÓCIO
-   ========================================================= */
 function hojeISO(){
   const d = new Date();
   return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
@@ -779,8 +781,37 @@ function calcularStatusGeral(r){
   if(r.finalizacao === "REJEITADA") return "REJEITADO";
   if(r.finalizacao === "APROVADA") return "APROVADO - AGUARDANDO PAGAMENTO";
   if(r.resposta === "NÃO RESPONDIDO APÓS 1 MÊS") return "SEM RESPOSTA APÓS 1 MÊS";
+  if(r.disputa === "Disputa não aberta - devolução correta") return "DISPUTA NÃO ABERTA - REEMBOLSAR";
   if(r.disputa) return "EM ANDAMENTO";
   return "A VERIFICAR";
+}
+
+const PRAZO_DIAS_SHOPEE = 3;
+
+function diasDesde(dataISO){
+  if(!dataISO) return 0;
+  const [y, m, d] = dataISO.split('-').map(Number);
+  if(!y || !m || !d) return 0;
+  const dataRef = new Date(y, m - 1, d);
+  const hoje = new Date();
+  const hojeSemHora = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate());
+  return Math.floor((hojeSemHora - dataRef) / 86400000);
+}
+
+function calcularPrazo(r){
+  if(r.disputa){ return null; }
+  const dias = diasDesde(r.dataISO);
+  const diasRestantes = PRAZO_DIAS_SHOPEE - dias;
+  if(diasRestantes <= 0){
+    return { expirado:true, urgente:false, diasRestantes:0, label:'PRAZO ENCERRADO' };
+  }
+  const plural = diasRestantes > 1 ? 's' : '';
+  return {
+    expirado:false,
+    urgente: diasRestantes <= 1,
+    diasRestantes,
+    label: `${diasRestantes} dia${plural} restante${plural}`
+  };
 }
 
 function adicionarRegistro(idPedidoBruto){
@@ -790,6 +821,7 @@ function adicionarRegistro(idPedidoBruto){
   const existente = registros.find(r => r.idPedido.trim().toUpperCase() === idPedido.toUpperCase());
   if(existente){
     toast(`Pedido ${idPedido} já estava registrado (${formatarDataBR(existente.dataISO)}) — não duplicado.`, 'warn');
+    tocarBipeNegado();
     destacarLinha(existente.id);
     return;
   }
@@ -800,14 +832,16 @@ function adicionarRegistro(idPedidoBruto){
     idPedido: idPedido,
     dataISO: (match && match.dataISO) ? match.dataISO : hojeISO(),
     loja: match ? match.loja : '',
+    produto: '',
     ocorrido: '', disputa: '', resposta: '', finalizacao: '', pagamento: '',
     observacao: '',
     criadoEm: Date.now()
   };
-  registros.unshift(novo); // mais recente primeiro
+  registros.unshift(novo);
   saveRegistros();
   renderRegistros();
   toast(match ? `Pedido bipado! Loja e data puxadas da base.` : `Pedido bipado!`, 'success');
+  tocarBipeSucesso();
   destacarLinha(novo.id);
 }
 
@@ -833,9 +867,6 @@ function destacarLinha(id){
   });
 }
 
-/* =========================================================
-   RENDER — BIPAGEM
-   ========================================================= */
 const tbodyRegistros = document.getElementById('tbodyRegistros');
 const searchInput = document.getElementById('searchInput');
 const filterStatus = document.getElementById('filterStatus');
@@ -863,27 +894,56 @@ function renderRegistros(){
   const listaFiltrada = registros.filter(r => {
     const status = calcularStatusGeral(r);
     if(statusFiltro && status !== statusFiltro) return false;
+    if(filtroPrazo){
+      const p = calcularPrazo(r);
+      if(filtroPrazo === 'expirado' && !(p && p.expirado)) return false;
+      if(filtroPrazo === 'urgente' && !(p && p.urgente)) return false;
+    }
     if(!termo) return true;
     return (r.idPedido||'').toLowerCase().includes(termo) ||
+           (r.produto||'').toLowerCase().includes(termo) ||
            (r.loja||'').toLowerCase().includes(termo) ||
            (r.observacao||'').toLowerCase().includes(termo);
   });
 
   countChip.textContent = `${listaFiltrada.length} de ${registros.length} registros`;
 
+  const prazoChip = document.getElementById('prazoChip');
+  if(filtroPrazo){
+    prazoChip.style.display = 'inline-block';
+    prazoChip.textContent = (filtroPrazo === 'expirado' ? '🚫 Prazo encerrado' : '⚠️ Prazo urgente') + ' — toque pra limpar';
+    prazoChip.onclick = () => { filtroPrazo = null; renderRegistros(); };
+  }else{
+    prazoChip.style.display = 'none';
+    prazoChip.onclick = null;
+  }
+
   if(listaFiltrada.length === 0){
-    tbodyRegistros.innerHTML = `<tr class="empty-row"><td colspan="12">Nenhum pedido bipado ainda. Clique no campo acima e escaneie a primeira etiqueta.</td></tr>`;
+    tbodyRegistros.innerHTML = `<tr class="empty-row"><td colspan="14">Nenhum pedido bipado ainda. Clique no campo acima e escaneie a primeira etiqueta.</td></tr>`;
     return;
   }
 
   tbodyRegistros.innerHTML = listaFiltrada.map((r, idx) => {
     const status = calcularStatusGeral(r);
     const cor = STATUS_COLORS[status];
+    const prazo = calcularPrazo(r);
+    let prazoHtml;
+    if(prazo === null){
+      prazoHtml = `<span style="color:var(--texto-suave); font-size:12px;">—</span>`;
+    }else if(prazo.expirado){
+      prazoHtml = `<span class="status-badge" style="background:#C0392B;color:#fff;">🚫 ENCERRADO</span>`;
+    }else if(prazo.urgente){
+      prazoHtml = `<span class="status-badge" style="background:#FFB570;color:#663C00;">⚠️ ${prazo.label}</span>`;
+    }else{
+      prazoHtml = `<span class="status-badge" style="background:#C8E6C9;color:#256029;">${prazo.label}</span>`;
+    }
     return `
       <tr data-row-id="${r.id}">
         <td>${idx+1}</td>
         <td class="col-id">${escapeHtml(r.idPedido)}</td>
+        <td><input type="text" data-field="produto" value="${escapeHtml(r.produto)}" placeholder="Nome do produto"></td>
         <td>${formatarDataBR(r.dataISO)}</td>
+        <td>${prazoHtml}</td>
         <td><select data-field="loja">${optionsHtml(lojas, r.loja)}</select></td>
         <td><select data-field="ocorrido">${optionsHtml(OCORRIDO_OPTIONS, r.ocorrido)}</select></td>
         <td><select data-field="disputa">${optionsHtml(DISPUTA_OPTIONS, r.disputa)}</select></td>
@@ -896,7 +956,6 @@ function renderRegistros(){
       </tr>`;
   }).join('');
 
-  // liga eventos das células desta renderização
   tbodyRegistros.querySelectorAll('tr').forEach(tr => {
     const id = tr.getAttribute('data-row-id');
     tr.querySelectorAll('select[data-field], input[data-field]').forEach(el => {
@@ -904,9 +963,9 @@ function renderRegistros(){
       el.addEventListener(evt, () => {
         const reg = registros.find(r => r.id === id);
         if(!reg) return;
-        reg[el.getAttribute('data-field')] = el.value;
+        const campo = el.getAttribute('data-field');
+        reg[campo] = el.value;
         saveRegistros();
-        // atualiza só o badge de status desta linha, sem re-renderizar tudo (mantém foco)
         const novoStatus = calcularStatusGeral(reg);
         const cor = STATUS_COLORS[novoStatus];
         const badge = tr.querySelector('.status-badge');
@@ -916,8 +975,15 @@ function renderRegistros(){
           badge.style.color = cor.fg;
         }
         renderResumo();
-        if(filterStatus.value && filterStatus.value !== novoStatus){
-          // se o filtro de status ativo não bate mais, re-renderiza a tabela pra sumir a linha
+        const filtroPrazoAindaBate = !filtroPrazo || (() => {
+          const p = calcularPrazo(reg);
+          if(filtroPrazo === 'expirado') return p && p.expirado;
+          if(filtroPrazo === 'urgente') return p && p.urgente;
+          return true;
+        })();
+        if((filterStatus.value && filterStatus.value !== novoStatus) || !filtroPrazoAindaBate){
+          renderRegistros();
+        }else if(campo === 'disputa'){
           renderRegistros();
         }
       });
@@ -926,9 +992,6 @@ function renderRegistros(){
   });
 }
 
-/* =========================================================
-   RENDER / GESTÃO — LOJAS
-   ========================================================= */
 function atualizarDropdownsLoja(){
   const optsHtml = lojas.map(l => `<option value="${escapeHtml(l)}">${escapeHtml(l)}</option>`).join('');
   const placeholderHtml = lojas.length === 0 ? '<option value="">Cadastre uma loja primeiro</option>' : '';
@@ -987,9 +1050,6 @@ document.getElementById('novaLojaInput').addEventListener('keydown', (e) => {
   if(e.key === 'Enter'){ e.preventDefault(); adicionarLoja(); }
 });
 
-/* =========================================================
-   RENDER — BASE DE PEDIDOS
-   ========================================================= */
 const tbodyBase = document.getElementById('tbodyBase');
 const searchBaseInput = document.getElementById('searchBaseInput');
 const baseCountChip = document.getElementById('baseCountChip');
@@ -1029,12 +1089,10 @@ function renderBase(){
 function parseDataFlexivel(str){
   if(!str) return '';
   str = str.trim();
-  // dd/mm/aaaa ou dd-mm-aaaa
   let m = str.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
   if(m){
     return `${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`;
   }
-  // aaaa-mm-dd (já ISO)
   m = str.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
   if(m){
     return `${m[1]}-${m[2].padStart(2,'0')}-${m[3].padStart(2,'0')}`;
@@ -1080,18 +1138,33 @@ function importarBaseEmLote(){
   toast(`Importação concluída: ${novos} novos, ${atualizados} atualizados.`, 'success');
 }
 
-/* =========================================================
-   RESUMO
-   ========================================================= */
 const resumoGrid = document.getElementById('resumoGrid');
 function renderResumo(){
   const contagem = {};
   STATUS_ORDER.forEach(s => contagem[s] = 0);
-  registros.forEach(r => { contagem[calcularStatusGeral(r)]++; });
+  let expirados = 0, urgentes = 0;
+  registros.forEach(r => {
+    contagem[calcularStatusGeral(r)]++;
+    const p = calcularPrazo(r);
+    if(p && p.expirado) expirados++;
+    else if(p && p.urgente) urgentes++;
+  });
 
-  let html = STATUS_ORDER.map(s => {
+  let htmlAlertas = '';
+  if(expirados > 0 || urgentes > 0){
+    htmlAlertas += `<div class="resumo-card" style="background:#FFB570; color:#663C00; cursor:pointer;" data-prazo="urgente" title="Ver pedidos com prazo apertado">
+      <div class="num">${urgentes}</div>
+      <div class="lbl">⚠️ PRAZO APERTADO (1 dia ou menos)</div>
+    </div>
+    <div class="resumo-card" style="background:#C0392B; color:#fff; cursor:pointer;" data-prazo="expirado" title="Ver pedidos com prazo encerrado">
+      <div class="num">${expirados}</div>
+      <div class="lbl">🚫 PRAZO ENCERRADO — SEM DISPUTA</div>
+    </div>`;
+  }
+
+  let html = htmlAlertas + STATUS_ORDER.map(s => {
     const cor = STATUS_COLORS[s];
-    return `<div class="resumo-card" style="background:${cor.bg}; color:${cor.fg};">
+    return `<div class="resumo-card" style="background:${cor.bg}; color:${cor.fg}; cursor:pointer;" data-status="${escapeHtml(s)}" title="Ver lista de pedidos com este status">
       <div class="num">${contagem[s]}</div>
       <div class="lbl">${s}</div>
     </div>`;
@@ -1103,11 +1176,34 @@ function renderResumo(){
   </div>`;
 
   resumoGrid.innerHTML = html;
+
+  resumoGrid.querySelectorAll('.resumo-card[data-status]').forEach(card => {
+    card.addEventListener('click', () => {
+      filtroPrazo = null;
+      filterStatus.value = card.getAttribute('data-status');
+      searchInput.value = '';
+      renderRegistros();
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('section.view').forEach(v => v.classList.remove('active'));
+      document.querySelector('.tab-btn[data-view="bipagem"]').classList.add('active');
+      document.getElementById('view-bipagem').classList.add('active');
+    });
+  });
+
+  resumoGrid.querySelectorAll('.resumo-card[data-prazo]').forEach(card => {
+    card.addEventListener('click', () => {
+      filtroPrazo = card.getAttribute('data-prazo');
+      filterStatus.value = '';
+      searchInput.value = '';
+      renderRegistros();
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('section.view').forEach(v => v.classList.remove('active'));
+      document.querySelector('.tab-btn[data-view="bipagem"]').classList.add('active');
+      document.getElementById('view-bipagem').classList.add('active');
+    });
+  });
 }
 
-/* =========================================================
-   EXPORTAÇÃO / BACKUP
-   ========================================================= */
 function csvEscape(v){
   const s = String(v ?? '');
   if(/[",\n;]/.test(s)) return '"' + s.replace(/"/g,'""') + '"';
@@ -1124,11 +1220,15 @@ function baixarArquivo(nome, conteudo, tipo){
 }
 
 function exportarRegistrosCsv(){
-  const cab = ['Nº','ID Pedido','Data','Loja','Ocorrido','Disputa Status','Resposta após 1 mês','Finalização','Pagamento','Status Geral','Observação'];
-  const linhas = registros.map((r,idx) => [
-    idx+1, r.idPedido, formatarDataBR(r.dataISO), r.loja, r.ocorrido, r.disputa,
-    r.resposta, r.finalizacao, r.pagamento, calcularStatusGeral(r), r.observacao
-  ].map(csvEscape).join(';'));
+  const cab = ['Nº','ID Pedido','Produto','Data','Prazo','Loja','Ocorrido','Disputa Status','Resposta após 1 mês','Finalização','Pagamento','Status Geral','Observação'];
+  const linhas = registros.map((r,idx) => {
+    const p = calcularPrazo(r);
+    const prazoTexto = p === null ? '—' : (p.expirado ? 'PRAZO ENCERRADO' : p.label);
+    return [
+      idx+1, r.idPedido, r.produto, formatarDataBR(r.dataISO), prazoTexto, r.loja, r.ocorrido, r.disputa,
+      r.resposta, r.finalizacao, r.pagamento, calcularStatusGeral(r), r.observacao
+    ].map(csvEscape).join(';');
+  });
   const csv = '\uFEFF' + cab.join(';') + '\n' + linhas.join('\n');
   baixarArquivo(`bipex_registros_${hojeISO()}.csv`, csv, 'text/csv;charset=utf-8');
   toast('CSV exportado.', 'success');
@@ -1169,9 +1269,41 @@ function restaurarBackup(file){
   reader.readAsText(file);
 }
 
-/* =========================================================
-   TOASTS
-   ========================================================= */
+let audioCtx = null;
+function getAudioCtx(){
+  if(!audioCtx){
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if(!AC) return null;
+    audioCtx = new AC();
+  }
+  if(audioCtx.state === 'suspended'){ audioCtx.resume(); }
+  return audioCtx;
+}
+function tocarTom(freq, duracaoMs, atrasoMs, tipo, volume){
+  const ctx = getAudioCtx();
+  if(!ctx) return;
+  const inicio = ctx.currentTime + (atrasoMs||0)/1000;
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = tipo || 'sine';
+  osc.frequency.value = freq;
+  gain.gain.setValueAtTime(volume||0.25, inicio);
+  gain.gain.exponentialRampToValueAtTime(0.001, inicio + duracaoMs/1000);
+  osc.connect(gain);
+  gain.connect(ctx.destination);
+  osc.start(inicio);
+  osc.stop(inicio + duracaoMs/1000 + 0.02);
+}
+function tocarBipeSucesso(){
+  try{ tocarTom(1500, 110, 0, 'sine', 0.22); }catch(e){}
+}
+function tocarBipeNegado(){
+  try{
+    tocarTom(300, 160, 0, 'square', 0.22);
+    tocarTom(220, 220, 170, 'square', 0.22);
+  }catch(e){}
+}
+
 const toastHost = document.getElementById('toastHost');
 function toast(msg, tipo){
   const el = document.createElement('div');
@@ -1181,9 +1313,6 @@ function toast(msg, tipo){
   setTimeout(() => { el.style.opacity = '0'; el.style.transition = 'opacity .3s'; setTimeout(()=>el.remove(), 300); }, 3800);
 }
 
-/* =========================================================
-   LEITURA POR CÂMERA (celular)
-   ========================================================= */
 const CAMERA_LIB_URL = "https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js";
 let cameraLibLoaded = false;
 let cameraLibLoading = false;
@@ -1250,7 +1379,7 @@ function iniciarLeituraCamera(){
     { facingMode: "environment" },
     { fps: 10, qrbox: { width: 260, height: 160 } },
     onLeituraCameraSucesso,
-    () => { /* sem leitura neste frame — normal, ignora */ }
+    () => { }
   ).then(() => {
     cameraRunning = true;
     setCameraStatus('Câmera pronta — aponte pro código de barras.');
@@ -1263,7 +1392,7 @@ function iniciarLeituraCamera(){
 function onLeituraCameraSucesso(textoLido){
   const agora = Date.now();
   if(textoLido === lastCameraValue && (agora - lastCameraTime) < 2500){
-    return; // evita reler o mesmo código várias vezes seguidas
+    return;
   }
   lastCameraValue = textoLido;
   lastCameraTime = agora;
@@ -1290,9 +1419,6 @@ btnCameraScan.addEventListener('click', abrirCamera);
 btnCloseCamera.addEventListener('click', fecharCamera);
 cameraModal.addEventListener('click', (e) => { if(e.target === cameraModal) fecharCamera(); });
 
-/* =========================================================
-   TABS
-   ========================================================= */
 document.querySelectorAll('.tab-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -1305,9 +1431,6 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
   });
 });
 
-/* =========================================================
-   EVENTOS
-   ========================================================= */
 const scanInput = document.getElementById('scanInput');
 scanInput.addEventListener('keydown', (e) => {
   if(e.key === 'Enter'){
@@ -1323,8 +1446,8 @@ document.getElementById('btnAddManual').addEventListener('click', () => {
   scanInput.focus();
 });
 
-searchInput.addEventListener('input', renderRegistros);
-filterStatus.addEventListener('change', renderRegistros);
+searchInput.addEventListener('input', () => { filtroPrazo = null; renderRegistros(); });
+filterStatus.addEventListener('change', () => { filtroPrazo = null; renderRegistros(); });
 
 document.getElementById('btnExportCsv').addEventListener('click', exportarRegistrosCsv);
 document.getElementById('btnBackup').addEventListener('click', fazerBackup);
@@ -1338,7 +1461,7 @@ document.getElementById('btnImportBase').addEventListener('click', importarBaseE
 document.getElementById('btnAddBaseManual').addEventListener('click', () => {
   const idPedido = document.getElementById('manualBaseId').value.trim();
   const loja = document.getElementById('manualBaseLoja').value;
-  const dataVal = document.getElementById('manualBaseData').value; // yyyy-mm-dd nativo do <input type=date>
+  const dataVal = document.getElementById('manualBaseData').value;
   if(!idPedido){ toast('Digite o ID do pedido.', 'warn'); return; }
   if(!loja){ toast('Cadastre uma loja na aba "Lojas" antes de adicionar.', 'warn'); return; }
   const existente = base.find(b => b.idPedido.toUpperCase() === idPedido.toUpperCase());
@@ -1366,9 +1489,6 @@ document.getElementById('btnClearBase').addEventListener('click', () => {
   toast('Base limpa.', 'warn');
 });
 
-/* =========================================================
-   INICIALIZAÇÃO
-   ========================================================= */
 loadData();
 popularFiltroStatus();
 renderLojas();
