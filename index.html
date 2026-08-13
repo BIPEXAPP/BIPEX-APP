@@ -476,9 +476,162 @@
     color: var(--texto-suave);
     padding: 18px;
   }
+
+  /* ---------- Autenticação ---------- */
+  #authOverlay{
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(150deg, var(--laranja-escuro), var(--laranja));
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  #authOverlay.hidden{ display:none; }
+  .auth-card{
+    background: #fff;
+    border-radius: 18px;
+    padding: 32px 28px;
+    max-width: 380px;
+    width: 100%;
+    box-shadow: var(--sombra-forte);
+    text-align: center;
+  }
+  .auth-card .auth-logo{
+    width: 60px; height: 60px; border-radius: 50%;
+    background: var(--laranja-claro);
+    display:flex; align-items:center; justify-content:center;
+    margin: 0 auto 14px;
+  }
+  .auth-card h2{ margin: 0 0 4px; color: var(--laranja-escuro); font-size: 20px; }
+  .auth-card p.auth-sub{ margin: 0 0 22px; font-size: 13px; color: var(--texto-suave); }
+  .auth-field{ text-align:left; margin-bottom: 14px; }
+  .auth-field label{ display:block; font-size:12px; font-weight:700; color:var(--laranja-escuro); margin-bottom:5px; }
+  .auth-field input{
+    width:100%; padding: 11px 12px; border-radius: 9px;
+    border: 1.5px solid #EAD3BC; font-size: 14px; font-family: inherit;
+  }
+  .auth-btn{
+    width:100%; padding: 13px; border:none; border-radius: 10px;
+    background: var(--laranja); color:#fff; font-weight:700; font-size:14px;
+    cursor:pointer; margin-top: 6px;
+  }
+  .auth-btn:hover{ background: var(--laranja-escuro); }
+  .auth-btn:disabled{ opacity:.6; cursor:default; }
+  .auth-switch{ margin-top:16px; font-size:13px; color:var(--texto-suave); }
+  .auth-switch a{ color: var(--laranja-escuro); font-weight:700; cursor:pointer; text-decoration:underline; }
+  .auth-error{
+    background:#FDECEA; color:#C0392B; border-radius:8px; padding:9px 12px;
+    font-size:12.5px; margin-bottom:14px; text-align:left; display:none;
+  }
+  .auth-error.show{ display:block; }
+  .auth-status-icon{ font-size: 40px; margin-bottom: 10px; }
+  .auth-view{ display:none; }
+  .auth-view.active{ display:block; }
+
+  .admin-approve-card{
+    background: var(--branco);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 12px;
+    border: 1px solid #F1E0D2;
+    text-align:left;
+  }
+  .admin-approve-card .aa-name{ font-weight:700; color: var(--texto); font-size:14.5px; }
+  .admin-approve-card .aa-meta{ font-size:12px; color: var(--texto-suave); margin: 3px 0 10px; }
+  .admin-approve-actions{ display:flex; gap:8px; }
+  .badge-status{
+    display:inline-block; padding: 3px 9px; border-radius: 999px;
+    font-size: 11px; font-weight:700; margin-left:6px;
+  }
+  .badge-pending{ background:#FFD966; color:#663C00; }
+  .badge-approved{ background:#A9D18E; color:#2E5B1E; }
+  .badge-blocked{ background:#E74C3C; color:#fff; }
+  .logout-btn{
+    background: rgba(255,255,255,.16);
+    border: 1px solid rgba(255,255,255,.3);
+    color:#fff; padding: 6px 12px; border-radius: 999px;
+    font-size: 11px; cursor:pointer; font-weight:700;
+  }
+  .logout-btn:hover{ background: rgba(255,255,255,.28); }
 </style>
 </head>
 <body>
+
+<div id="authOverlay">
+  <div class="auth-card">
+
+    <div id="authViewLogin" class="auth-view active">
+      <div class="auth-logo">
+        <svg width="30" height="30" viewBox="0 0 62 62" fill="none" aria-hidden="true">
+          <path d="M31 8 L52 18 V42 L31 54 L10 42 V18 Z" stroke="#C55A11" stroke-width="4.5" stroke-linejoin="round" fill="none"/>
+          <path d="M10 18 L31 28 L52 18" stroke="#C55A11" stroke-width="4.5" stroke-linejoin="round" fill="none"/>
+          <path d="M31 28 V54" stroke="#C55A11" stroke-width="4.5" fill="none"/>
+        </svg>
+      </div>
+      <h2>Entrar no Bipex</h2>
+      <p class="auth-sub">Use seu e-mail e senha cadastrados</p>
+      <div class="auth-error" id="loginError"></div>
+      <div class="auth-field">
+        <label>E-mail</label>
+        <input type="email" id="loginEmail" autocomplete="username">
+      </div>
+      <div class="auth-field">
+        <label>Senha</label>
+        <input type="password" id="loginPassword" autocomplete="current-password">
+      </div>
+      <button class="auth-btn" id="btnLogin">Entrar</button>
+      <p class="auth-switch">Ainda não tem conta? <a id="linkGoSignup">Criar conta</a></p>
+    </div>
+
+    <div id="authViewSignup" class="auth-view">
+      <div class="auth-logo">
+        <svg width="30" height="30" viewBox="0 0 62 62" fill="none" aria-hidden="true">
+          <path d="M31 8 L52 18 V42 L31 54 L10 42 V18 Z" stroke="#C55A11" stroke-width="4.5" stroke-linejoin="round" fill="none"/>
+          <path d="M10 18 L31 28 L52 18" stroke="#C55A11" stroke-width="4.5" stroke-linejoin="round" fill="none"/>
+          <path d="M31 28 V54" stroke="#C55A11" stroke-width="4.5" fill="none"/>
+        </svg>
+      </div>
+      <h2>Criar conta</h2>
+      <p class="auth-sub">Seu cadastro passa por aprovação antes de liberar o acesso</p>
+      <div class="auth-error" id="signupError"></div>
+      <div class="auth-field">
+        <label>Nome completo</label>
+        <input type="text" id="signupName" autocomplete="name">
+      </div>
+      <div class="auth-field">
+        <label>Telefone</label>
+        <input type="tel" id="signupPhone" placeholder="(11) 91234-5678" autocomplete="tel">
+      </div>
+      <div class="auth-field">
+        <label>E-mail</label>
+        <input type="email" id="signupEmail" autocomplete="username">
+      </div>
+      <div class="auth-field">
+        <label>Senha (mínimo 6 caracteres)</label>
+        <input type="password" id="signupPassword" autocomplete="new-password">
+      </div>
+      <button class="auth-btn" id="btnSignup">Cadastrar</button>
+      <p class="auth-switch">Já tem conta? <a id="linkGoLogin">Entrar</a></p>
+    </div>
+
+    <div id="authViewPending" class="auth-view">
+      <div class="auth-status-icon">⏳</div>
+      <h2>Cadastro em análise</h2>
+      <p class="auth-sub">Seu acesso ainda não foi aprovado. Assim que for liberado, você já vai conseguir entrar normalmente por aqui.</p>
+      <button class="auth-btn" id="btnLogoutPending" style="background:var(--branco); color:var(--laranja-escuro); border:1.5px solid var(--laranja);">Sair</button>
+    </div>
+
+    <div id="authViewBlocked" class="auth-view">
+      <div class="auth-status-icon">🚫</div>
+      <h2>Acesso bloqueado</h2>
+      <p class="auth-sub">Seu acesso a este app foi bloqueado. Fale com o administrador se achar que isso é um engano.</p>
+      <button class="auth-btn" id="btnLogoutBlocked" style="background:var(--branco); color:var(--laranja-escuro); border:1.5px solid var(--laranja);">Sair</button>
+    </div>
+
+  </div>
+</div>
 
 <header class="app-header">
   <div class="brand-block">
@@ -496,7 +649,10 @@
       <p>Controle de bipagem, disputas e reembolso</p>
     </div>
   </div>
-  <div class="status-pill"><span class="status-dot"></span> Salvo</div>
+  <div style="display:flex; align-items:center; gap:10px;">
+    <div class="status-pill"><span class="status-dot"></span> Salvo</div>
+    <button class="logout-btn" id="btnLogout">Sair</button>
+  </div>
 </header>
 
 <nav class="tabs">
@@ -504,6 +660,7 @@
   <button class="tab-btn" data-view="lojas"><span class="tab-icon">🏪</span>Lojas</button>
   <button class="tab-btn" data-view="base"><span class="tab-icon">📦</span>Base</button>
   <button class="tab-btn" data-view="resumo"><span class="tab-icon">📊</span>Resumo</button>
+  <button class="tab-btn" id="tabAprovacoes" data-view="aprovacoes" style="display:none;"><span class="tab-icon">👤</span>Aprovações</button>
   <button class="tab-btn" data-view="instrucoes"><span class="tab-icon">❓</span>Ajuda</button>
 </nav>
 
@@ -656,6 +813,27 @@
     <div class="resumo-grid" id="resumoGrid"></div>
   </section>
 
+  <!-- ===================== APROVAÇÕES (admin) ===================== -->
+  <section class="view" id="view-aprovacoes">
+    <h2 class="view-title">Aprovações de acesso</h2>
+    <p class="view-sub">Aprove, bloqueie ou reative o acesso de cada pessoa cadastrada no Bipex.</p>
+
+    <div class="card">
+      <h3 style="margin:0 0 10px; font-size:14px; color:var(--laranja-escuro);">⏳ Pendentes</h3>
+      <div id="listaPendentes"><p class="hint">Nenhum cadastro pendente.</p></div>
+    </div>
+
+    <div class="card">
+      <h3 style="margin:0 0 10px; font-size:14px; color:var(--laranja-escuro);">✅ Aprovados</h3>
+      <div id="listaAprovados"><p class="hint">Nenhum usuário aprovado ainda.</p></div>
+    </div>
+
+    <div class="card">
+      <h3 style="margin:0 0 10px; font-size:14px; color:var(--laranja-escuro);">🚫 Bloqueados</h3>
+      <div id="listaBloqueados"><p class="hint">Nenhum usuário bloqueado.</p></div>
+    </div>
+  </section>
+
   <!-- ===================== INSTRUÇÕES ===================== -->
   <section class="view" id="view-instrucoes">
     <h2 class="view-title">Como usar</h2>
@@ -762,7 +940,205 @@
   </div>
 </div>
 
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-database-compat.js"></script>
 <script>
+/* =========================================================
+   FIREBASE — AUTENTICAÇÃO E APROVAÇÃO DE USUÁRIOS
+   ========================================================= */
+const firebaseConfig = {
+  apiKey: "AIzaSyC5QQ4e72m1r3kO0iEV0r2wi43vXTRT_zQ",
+  authDomain: "bipex-79964.firebaseapp.com",
+  databaseURL: "https://bipex-79964-default-rtdb.firebaseio.com",
+  projectId: "bipex-79964",
+  storageBucket: "bipex-79964.firebasestorage.app",
+  messagingSenderId: "335579999663",
+  appId: "1:335579999663:web:eeb4b9961b92526480135a"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const rtdb = firebase.database();
+
+const ADMIN_EMAIL = "hmonts2019@gmail.com";
+
+let currentUid = null;
+let currentUserEmail = null;
+let appJaIniciado = false;
+
+function showAuthView(viewId){
+  document.querySelectorAll('.auth-view').forEach(v => v.classList.remove('active'));
+  document.getElementById(viewId).classList.add('active');
+}
+function setAuthError(elId, msg){
+  const el = document.getElementById(elId);
+  if(!msg){ el.classList.remove('show'); el.textContent=''; return; }
+  el.textContent = msg;
+  el.classList.add('show');
+}
+function traduzErroFirebase(err){
+  const code = err && err.code || '';
+  const mapa = {
+    'auth/invalid-email': 'E-mail inválido.',
+    'auth/user-not-found': 'E-mail ou senha incorretos.',
+    'auth/wrong-password': 'E-mail ou senha incorretos.',
+    'auth/invalid-credential': 'E-mail ou senha incorretos.',
+    'auth/email-already-in-use': 'Já existe uma conta com esse e-mail.',
+    'auth/weak-password': 'A senha precisa ter pelo menos 6 caracteres.',
+    'auth/missing-password': 'Digite uma senha.',
+    'auth/too-many-requests': 'Muitas tentativas. Aguarde um pouco e tente de novo.'
+  };
+  return mapa[code] || 'Não foi possível concluir. Tente novamente.';
+}
+
+document.getElementById('linkGoSignup').addEventListener('click', () => { setAuthError('loginError',''); showAuthView('authViewSignup'); });
+document.getElementById('linkGoLogin').addEventListener('click', () => { setAuthError('signupError',''); showAuthView('authViewLogin'); });
+
+document.getElementById('btnLogin').addEventListener('click', () => {
+  const email = document.getElementById('loginEmail').value.trim();
+  const senha = document.getElementById('loginPassword').value;
+  setAuthError('loginError', '');
+  if(!email || !senha){ setAuthError('loginError', 'Preencha e-mail e senha.'); return; }
+  auth.signInWithEmailAndPassword(email, senha).catch(err => {
+    setAuthError('loginError', traduzErroFirebase(err));
+  });
+});
+
+document.getElementById('btnSignup').addEventListener('click', () => {
+  const nome = document.getElementById('signupName').value.trim();
+  const telefone = document.getElementById('signupPhone').value.trim();
+  const email = document.getElementById('signupEmail').value.trim();
+  const senha = document.getElementById('signupPassword').value;
+  setAuthError('signupError', '');
+  if(!nome || !telefone || !email || !senha){ setAuthError('signupError', 'Preencha todos os campos.'); return; }
+  if(senha.length < 6){ setAuthError('signupError', 'A senha precisa ter pelo menos 6 caracteres.'); return; }
+  auth.createUserWithEmailAndPassword(email, senha).then(cred => {
+    return rtdb.ref('users/' + cred.user.uid).set({
+      nome, telefone, email,
+      status: 'pending',
+      criadoEm: Date.now()
+    });
+  }).catch(err => {
+    setAuthError('signupError', traduzErroFirebase(err));
+  });
+});
+
+['loginEmail','loginPassword'].forEach(id => {
+  document.getElementById(id).addEventListener('keydown', (e) => { if(e.key === 'Enter') document.getElementById('btnLogin').click(); });
+});
+['signupName','signupPhone','signupEmail','signupPassword'].forEach(id => {
+  document.getElementById(id).addEventListener('keydown', (e) => { if(e.key === 'Enter') document.getElementById('btnSignup').click(); });
+});
+
+document.getElementById('btnLogout').addEventListener('click', () => auth.signOut());
+document.getElementById('btnLogoutPending').addEventListener('click', () => auth.signOut());
+document.getElementById('btnLogoutBlocked').addEventListener('click', () => auth.signOut());
+
+auth.onAuthStateChanged((user) => {
+  const overlay = document.getElementById('authOverlay');
+  if(!user){
+    currentUid = null; currentUserEmail = null;
+    overlay.classList.remove('hidden');
+    showAuthView('authViewLogin');
+    document.getElementById('loginEmail').value = '';
+    document.getElementById('loginPassword').value = '';
+    return;
+  }
+  currentUid = user.uid;
+  currentUserEmail = (user.email || '').toLowerCase();
+
+  rtdb.ref('users/' + user.uid).on('value', (snap) => {
+    const perfil = snap.val();
+    if(!perfil){
+      // conta autenticada mas sem perfil no banco — trata como pendente
+      overlay.classList.remove('hidden');
+      showAuthView('authViewPending');
+      return;
+    }
+    if(perfil.status === 'approved'){
+      overlay.classList.add('hidden');
+      const isAdmin = currentUserEmail === ADMIN_EMAIL.toLowerCase();
+      document.getElementById('tabAprovacoes').style.display = isAdmin ? '' : 'none';
+      if(isAdmin) iniciarPainelAprovacoes();
+      if(!appJaIniciado){
+        appJaIniciado = true;
+        iniciarAppPosLogin();
+      }
+    }else if(perfil.status === 'blocked'){
+      overlay.classList.remove('hidden');
+      showAuthView('authViewBlocked');
+    }else{
+      overlay.classList.remove('hidden');
+      showAuthView('authViewPending');
+    }
+  });
+});
+
+/* =========================================================
+   PAINEL DE APROVAÇÕES (só visível pro admin)
+   ========================================================= */
+function renderCardUsuario(uid, u, statusAtual){
+  const div = document.createElement('div');
+  div.className = 'admin-approve-card';
+  const badgeClasse = statusAtual === 'approved' ? 'badge-approved' : statusAtual === 'blocked' ? 'badge-blocked' : 'badge-pending';
+  const badgeTexto = statusAtual === 'approved' ? 'Aprovado' : statusAtual === 'blocked' ? 'Bloqueado' : 'Pendente';
+  div.innerHTML = `
+    <div class="aa-name">${escapeHtml(u.nome || '(sem nome)')}<span class="badge-status ${badgeClasse}">${badgeTexto}</span></div>
+    <div class="aa-meta">${escapeHtml(u.email || '')} • ${escapeHtml(u.telefone || '')}</div>
+    <div class="admin-approve-actions"></div>
+  `;
+  const actions = div.querySelector('.admin-approve-actions');
+  if(statusAtual !== 'approved'){
+    const btnAprovar = document.createElement('button');
+    btnAprovar.className = 'btn btn-primary btn-sm';
+    btnAprovar.textContent = '✓ Aprovar';
+    btnAprovar.addEventListener('click', () => rtdb.ref('users/'+uid+'/status').set('approved'));
+    actions.appendChild(btnAprovar);
+  }
+  if(statusAtual !== 'blocked'){
+    const btnBloquear = document.createElement('button');
+    btnBloquear.className = 'btn btn-danger btn-sm';
+    btnBloquear.textContent = '🚫 Bloquear';
+    btnBloquear.addEventListener('click', () => {
+      if(confirm(`Bloquear o acesso de "${u.nome || u.email}"?`)) rtdb.ref('users/'+uid+'/status').set('blocked');
+    });
+    actions.appendChild(btnBloquear);
+  }
+  if(statusAtual === 'blocked'){
+    const btnReativar = document.createElement('button');
+    btnReativar.className = 'btn btn-ghost btn-sm';
+    btnReativar.textContent = 'Reativar';
+    btnReativar.addEventListener('click', () => rtdb.ref('users/'+uid+'/status').set('approved'));
+    actions.appendChild(btnReativar);
+  }
+  return div;
+}
+
+let painelAprovacoesIniciado = false;
+function iniciarPainelAprovacoes(){
+  if(painelAprovacoesIniciado) return;
+  painelAprovacoesIniciado = true;
+  rtdb.ref('users').on('value', (snap) => {
+    const todos = snap.val() || {};
+    const pendentesEl = document.getElementById('listaPendentes');
+    const aprovadosEl = document.getElementById('listaAprovados');
+    const bloqueadosEl = document.getElementById('listaBloqueados');
+    pendentesEl.innerHTML = ''; aprovadosEl.innerHTML = ''; bloqueadosEl.innerHTML = '';
+    let nPend=0, nApr=0, nBlo=0;
+    Object.keys(todos).forEach(uid => {
+      const u = todos[uid];
+      const status = u.status || 'pending';
+      const card = renderCardUsuario(uid, u, status);
+      if(status === 'approved'){ aprovadosEl.appendChild(card); nApr++; }
+      else if(status === 'blocked'){ bloqueadosEl.appendChild(card); nBlo++; }
+      else { pendentesEl.appendChild(card); nPend++; }
+    });
+    if(nPend===0) pendentesEl.innerHTML = '<p class="hint">Nenhum cadastro pendente.</p>';
+    if(nApr===0) aprovadosEl.innerHTML = '<p class="hint">Nenhum usuário aprovado ainda.</p>';
+    if(nBlo===0) bloqueadosEl.innerHTML = '<p class="hint">Nenhum usuário bloqueado.</p>';
+  });
+}
+
 /* =========================================================
    CONSTANTES / OPÇÕES (mesmas listas da planilha original)
    ========================================================= */
@@ -789,9 +1165,9 @@ const STATUS_COLORS = {
 };
 const STATUS_ORDER = Object.keys(STATUS_COLORS);
 
-const STORAGE_KEY_REG   = "devolucoes_registros_v1";
-const STORAGE_KEY_BASE  = "devolucoes_base_v1";
-const STORAGE_KEY_LOJAS = "devolucoes_lojas_v1";
+function STORAGE_KEY_REG(){ return "devolucoes_registros_v1_" + currentUid; }
+function STORAGE_KEY_BASE(){ return "devolucoes_base_v1_" + currentUid; }
+function STORAGE_KEY_LOJAS(){ return "devolucoes_lojas_v1_" + currentUid; }
 
 /* =========================================================
    ESTADO
@@ -810,23 +1186,23 @@ function uid(){
    ========================================================= */
 function loadData(){
   try{
-    registros = JSON.parse(localStorage.getItem(STORAGE_KEY_REG) || "[]");
+    registros = JSON.parse(localStorage.getItem(STORAGE_KEY_REG()) || "[]");
   }catch(e){ registros = []; }
   try{
-    base = JSON.parse(localStorage.getItem(STORAGE_KEY_BASE) || "[]");
+    base = JSON.parse(localStorage.getItem(STORAGE_KEY_BASE()) || "[]");
   }catch(e){ base = []; }
   try{
-    lojas = JSON.parse(localStorage.getItem(STORAGE_KEY_LOJAS) || "[]");
+    lojas = JSON.parse(localStorage.getItem(STORAGE_KEY_LOJAS()) || "[]");
   }catch(e){ lojas = []; }
 }
 function saveRegistros(){
-  localStorage.setItem(STORAGE_KEY_REG, JSON.stringify(registros));
+  localStorage.setItem(STORAGE_KEY_REG(), JSON.stringify(registros));
 }
 function saveBase(){
-  localStorage.setItem(STORAGE_KEY_BASE, JSON.stringify(base));
+  localStorage.setItem(STORAGE_KEY_BASE(), JSON.stringify(base));
 }
 function saveLojas(){
-  localStorage.setItem(STORAGE_KEY_LOJAS, JSON.stringify(lojas));
+  localStorage.setItem(STORAGE_KEY_LOJAS(), JSON.stringify(lojas));
 }
 
 /* =========================================================
@@ -1603,15 +1979,17 @@ document.getElementById('btnClearBase').addEventListener('click', () => {
 });
 
 /* =========================================================
-   INICIALIZAÇÃO
+   INICIALIZAÇÃO (só roda depois do login aprovado)
    ========================================================= */
-loadData();
-popularFiltroStatus();
-renderLojas();
-renderRegistros();
-renderBase();
-renderResumo();
-scanInput.focus();
+function iniciarAppPosLogin(){
+  loadData();
+  popularFiltroStatus();
+  renderLojas();
+  renderRegistros();
+  renderBase();
+  renderResumo();
+  scanInput.focus();
+}
 </script>
 
 </body>
