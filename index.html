@@ -1028,6 +1028,7 @@
 
     <div style="display:flex; gap:8px; margin-top:12px;">
       <button class="btn btn-ghost btn-sm" id="btnAbrirCameraMidia" style="flex:1;">📷 Abrir câmera</button>
+      <button class="btn btn-primary btn-sm" id="btnBaixarTudoMidia" style="flex:1;">⬇️ Baixar tudo (.zip)</button>
     </div>
 
     <div class="midia-grid" id="midiaGrid"></div>
@@ -1035,6 +1036,7 @@
   </div>
 </div>
 
+<script src="https://unpkg.com/jszip@3.10.1/dist/jszip.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-database-compat.js"></script>
@@ -2022,7 +2024,7 @@ function alternarLanterna(){
 
 function onLeituraCameraSucesso(textoLido){
   const agora = Date.now();
-  if(textoLido === lastCameraValue && (agora - lastCameraTime) < 2500){
+  if(textoLido === lastCameraValue && (agora - lastCameraTime) < 1200){
     return; // evita reler o mesmo código várias vezes seguidas
   }
   lastCameraValue = textoLido;
@@ -2199,6 +2201,13 @@ function atualizarContadorMidia(registroId){
   }).catch(() => {});
 }
 
+function extensaoMidia(item){
+  if(item.tipo === 'foto') return 'jpg';
+  const tipo = (item.blob && item.blob.type) || '';
+  if(tipo.includes('mp4')) return 'mp4';
+  return 'webm';
+}
+
 function formatarTempoMidia(seg){
   const m = String(Math.floor(seg/60)).padStart(2,'0');
   const s = String(seg%60).padStart(2,'0');
@@ -2246,7 +2255,7 @@ function renderGridMidia(){
       btnBaixar.addEventListener('click', () => {
         const a = document.createElement('a');
         a.href = url;
-        a.download = `bipex_pedido_${midiaRegistroAtualId}_${item.tipo}_${item.id}.${item.tipo === 'foto' ? 'jpg' : 'webm'}`;
+        a.download = `bipex_pedido_${midiaRegistroAtualId}_${item.tipo}_${item.id}.${extensaoMidia(item)}`;
         document.body.appendChild(a); a.click(); document.body.removeChild(a);
       });
       const btnDel = document.createElement('button');
@@ -2373,7 +2382,45 @@ function pararGravacaoVideo(){
   if(midiaRecorder && midiaRecorder.state !== 'inactive') midiaRecorder.stop();
 }
 
+function baixarTudoMidiaZip(){
+  if(!midiaRegistroAtualId) return;
+  midiaListarPorRegistro(midiaRegistroAtualId).then(itens => {
+    if(itens.length === 0){ toast('Nenhuma foto ou vídeo pra baixar ainda.', 'warn'); return; }
+    if(typeof JSZip === 'undefined'){ toast('Não foi possível gerar o .zip (biblioteca não carregou). Verifique sua internet.', 'error'); return; }
+    const btn = document.getElementById('btnBaixarTudoMidia');
+    const textoOriginal = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'Gerando .zip...';
+    const zip = new JSZip();
+    let contFoto = 0;
+    itens.forEach(item => {
+      if(item.tipo === 'foto'){
+        contFoto++;
+        zip.file(`foto_${contFoto}.jpg`, item.blob);
+      }else{
+        zip.file(`video.${extensaoMidia(item)}`, item.blob);
+      }
+    });
+    zip.generateAsync({ type: 'blob' }).then(blob => {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `bipex_pedido_${midiaRegistroAtualId}_midia.zip`;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      btn.disabled = false;
+      btn.textContent = textoOriginal;
+      toast('Zip gerado e baixado!', 'success');
+    }).catch(() => {
+      btn.disabled = false;
+      btn.textContent = textoOriginal;
+      toast('Não foi possível gerar o .zip.', 'error');
+    });
+  });
+}
+
 document.getElementById('btnAbrirCameraMidia').addEventListener('click', abrirCameraMidia);
+document.getElementById('btnBaixarTudoMidia').addEventListener('click', baixarTudoMidiaZip);
 document.getElementById('btnCloseMidia').addEventListener('click', fecharModalMidia);
 document.getElementById('btnTirarFoto').addEventListener('click', tirarFotoMidia);
 document.getElementById('btnGravarVideo').addEventListener('click', () => {
