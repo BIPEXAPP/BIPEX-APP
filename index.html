@@ -447,6 +447,10 @@
     color: var(--laranja-escuro);
     font-size: 14px;
   }
+  #btnLanterna.active{
+    background: var(--laranja-claro);
+    color: var(--laranja-escuro);
+  }
   #cameraReaderRegion{
     border-radius: 12px;
     overflow: hidden;
@@ -555,6 +559,68 @@
     font-size: 11px; cursor:pointer; font-weight:700;
   }
   .logout-btn:hover{ background: rgba(255,255,255,.28); }
+  .midia-btn-cell{ position: relative; }
+  .midia-count{
+    position:absolute; top:-4px; right:-4px;
+    background: var(--laranja-escuro); color:#fff;
+    font-size:9px; font-weight:800; border-radius:999px;
+    min-width:15px; height:15px; line-height:15px; text-align:center;
+    display:none; padding: 0 3px;
+  }
+  .midia-count.show{ display:inline-block; }
+
+  /* ---------- Modal de mídia por pedido ---------- */
+  .midia-modal{
+    position: fixed; inset:0; background: rgba(30,16,5,.78);
+    z-index: 1100; display:none; align-items:center; justify-content:center; padding:16px;
+  }
+  .midia-modal.open{ display:flex; }
+  .midia-modal-inner{
+    background:#fff; border-radius:16px; padding:16px; max-width:520px; width:100%;
+    box-shadow: var(--sombra-forte); max-height: 90vh; overflow-y:auto;
+  }
+  .midia-modal-header{ display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+  .midia-modal-header span{ font-weight:700; color:var(--laranja-escuro); font-size:14px; }
+  .midia-live-wrap{ position:relative; border-radius:12px; overflow:hidden; background:#000; min-height:220px; display:none; }
+  .midia-live-wrap.open{ display:block; }
+  .midia-live-wrap video{ width:100%; display:block; max-height: 50vh; }
+  .midia-live-controls{ display:flex; gap:10px; justify-content:center; padding:12px 0 2px; }
+  .midia-timer{
+    position:absolute; top:8px; right:8px; background:rgba(0,0,0,.6); color:#fff;
+    font-size:12px; font-weight:700; padding:3px 9px; border-radius:999px; display:none;
+  }
+  .midia-timer.show{ display:block; }
+  .record-btn{
+    width:56px; height:56px; border-radius:50%; border:3px solid var(--vermelho-escuro);
+    background:#fff; cursor:pointer; position:relative;
+  }
+  .record-btn::after{
+    content:''; position:absolute; inset:6px; border-radius:50%; background: var(--vermelho-escuro);
+    transition: all .15s ease;
+  }
+  .record-btn.recording::after{ border-radius:4px; inset:14px; }
+  .snap-btn{
+    width:56px; height:56px; border-radius:50%; border:3px solid var(--laranja);
+    background:#fff; cursor:pointer; font-size:22px;
+  }
+  .midia-grid{
+    display:grid; grid-template-columns: repeat(auto-fill, minmax(88px,1fr)); gap:10px; margin-top:14px;
+  }
+  .midia-item{ position:relative; border-radius:10px; overflow:hidden; background:#000; aspect-ratio:1/1; }
+  .midia-item img, .midia-item video{ width:100%; height:100%; object-fit:cover; display:block; }
+  .midia-item .mi-actions{
+    position:absolute; bottom:0; left:0; right:0; display:flex; justify-content:space-between;
+    background: linear-gradient(to top, rgba(0,0,0,.7), transparent); padding:4px 5px;
+  }
+  .midia-item .mi-actions button{
+    border:none; background:rgba(255,255,255,.9); border-radius:6px; font-size:11px;
+    padding:3px 5px; cursor:pointer;
+  }
+  .midia-item .mi-tag{
+    position:absolute; top:4px; left:4px; background:rgba(0,0,0,.6); color:#fff;
+    font-size:10px; padding:1px 6px; border-radius:999px;
+  }
+  .midia-empty{ font-size:12.5px; color:var(--texto-suave); text-align:center; padding:14px 0; }
 </style>
 </head>
 <body>
@@ -713,6 +779,7 @@
             <th style="width:140px;">Pagamento</th>
             <th style="width:190px;">Status Geral</th>
             <th style="width:170px;">Observação</th>
+            <th style="width:56px;">Mídia</th>
             <th style="width:36px;"></th>
           </tr>
         </thead>
@@ -932,11 +999,39 @@
   <div class="camera-modal-inner">
     <div class="camera-modal-header">
       <span>📷 Aponte a câmera para o código de barras ou QR Code</span>
-      <button class="icon-btn" id="btnCloseCamera" title="Fechar">✕</button>
+      <div style="display:flex; gap:8px; align-items:center;">
+        <button class="icon-btn" id="btnLanterna" title="Ligar/desligar lanterna" style="display:none; font-size:18px;">🔦</button>
+        <button class="icon-btn" id="btnCloseCamera" title="Fechar">✕</button>
+      </div>
     </div>
     <div id="cameraReaderRegion"></div>
     <div class="camera-status" id="cameraStatus">Abrindo a câmera...</div>
     <p class="camera-hint">Fica escaneando sem parar — pode bipar vários pedidos seguidos. Toque no ✕ quando terminar.</p>
+  </div>
+</div>
+
+<div class="midia-modal" id="midiaModal">
+  <div class="midia-modal-inner">
+    <div class="midia-modal-header">
+      <span id="midiaModalTitulo">Fotos e vídeo</span>
+      <button class="icon-btn" id="btnCloseMidia" title="Fechar">✕</button>
+    </div>
+
+    <div class="midia-live-wrap" id="midiaLiveWrap">
+      <video id="midiaLiveVideo" autoplay playsinline muted></video>
+      <div class="midia-timer" id="midiaTimer">00:00</div>
+      <div class="midia-live-controls">
+        <button class="snap-btn" id="btnTirarFoto" title="Tirar foto">📷</button>
+        <button class="record-btn" id="btnGravarVideo" title="Gravar vídeo"></button>
+      </div>
+    </div>
+
+    <div style="display:flex; gap:8px; margin-top:12px;">
+      <button class="btn btn-ghost btn-sm" id="btnAbrirCameraMidia" style="flex:1;">📷 Abrir câmera</button>
+    </div>
+
+    <div class="midia-grid" id="midiaGrid"></div>
+    <p class="hint" style="margin-top:10px;">Até 5 fotos e 1 vídeo (máx. 60s) por pedido. Fica salvo só neste aparelho — use "baixar" pra guardar em outro lugar.</p>
   </div>
 </div>
 
@@ -1375,7 +1470,7 @@ function renderRegistros(){
   }
 
   if(listaFiltrada.length === 0){
-    tbodyRegistros.innerHTML = `<tr class="empty-row"><td colspan="14">Nenhum pedido bipado ainda. Clique no campo acima e escaneie a primeira etiqueta.</td></tr>`;
+    tbodyRegistros.innerHTML = `<tr class="empty-row"><td colspan="15">Nenhum pedido bipado ainda. Clique no campo acima e escaneie a primeira etiqueta.</td></tr>`;
     return;
   }
 
@@ -1408,6 +1503,7 @@ function renderRegistros(){
         <td><select data-field="pagamento">${optionsHtml(PAGAMENTO_OPTIONS, r.pagamento)}</select></td>
         <td><span class="status-badge" style="background:${cor.bg};color:${cor.fg};">${status}</span></td>
         <td><input type="text" data-field="observacao" value="${escapeHtml(r.observacao)}" placeholder="—"></td>
+        <td><button class="icon-btn midia-btn-cell" data-action="midia" title="Fotos e vídeo deste pedido">📎<span class="midia-count" data-midia-count="${r.id}"></span></button></td>
         <td><button class="icon-btn" data-action="excluir" title="Excluir">🗑️</button></td>
       </tr>`;
   }).join('');
@@ -1449,6 +1545,8 @@ function renderRegistros(){
       });
     });
     tr.querySelector('[data-action="excluir"]').addEventListener('click', () => excluirRegistro(id));
+    tr.querySelector('[data-action="midia"]').addEventListener('click', () => abrirModalMidia(id, tr.querySelector('.col-id').textContent));
+    atualizarContadorMidia(id);
   });
 }
 
@@ -1856,20 +1954,70 @@ function iniciarLeituraCamera(){
     Html5QrcodeSupportedFormats.QR_CODE,
   ];
 
-  html5QrInstance = new Html5Qrcode("cameraReaderRegion", { formatsToSupport: formatosSuportados, verbose: false });
+  html5QrInstance = new Html5Qrcode("cameraReaderRegion", {
+    formatsToSupport: formatosSuportados,
+    verbose: false,
+    experimentalFeatures: { useBarCodeDetectorIfSupported: true }
+  });
+
+  function calcularQrbox(viewfinderWidth, viewfinderHeight){
+    const lado = Math.floor(Math.min(viewfinderWidth, viewfinderHeight) * 0.82);
+    return { width: lado, height: Math.floor(lado * 0.62) };
+  }
 
   html5QrInstance.start(
     { facingMode: "environment" },
-    { fps: 10, qrbox: { width: 260, height: 160 } },
+    {
+      fps: 20,
+      qrbox: calcularQrbox,
+      aspectRatio: 1.6,
+      videoConstraints: {
+        facingMode: "environment",
+        width: { ideal: 1920 },
+        height: { ideal: 1080 },
+        advanced: [{ focusMode: "continuous" }]
+      }
+    },
     onLeituraCameraSucesso,
     () => { /* sem leitura neste frame — normal, ignora */ }
   ).then(() => {
     cameraRunning = true;
     setCameraStatus('Câmera pronta — aponte pro código de barras ou QR Code.');
+    verificarSuporteLanterna();
   }).catch(() => {
     setCameraStatus('Não foi possível acessar a câmera. Verifique a permissão do navegador.');
     toast('Permita o acesso à câmera nas configurações do navegador pra usar essa opção.', 'error');
   });
+}
+
+let lanternaLigada = false;
+function verificarSuporteLanterna(){
+  const btnLanterna = document.getElementById('btnLanterna');
+  try{
+    const capacidades = html5QrInstance.getRunningTrackCapabilities();
+    if(capacidades && capacidades.torch){
+      btnLanterna.style.display = 'inline-flex';
+    }else{
+      btnLanterna.style.display = 'none';
+    }
+  }catch(e){
+    btnLanterna.style.display = 'none';
+  }
+  lanternaLigada = false;
+  btnLanterna.classList.remove('active');
+}
+
+function alternarLanterna(){
+  if(!html5QrInstance || !cameraRunning) return;
+  lanternaLigada = !lanternaLigada;
+  html5QrInstance.applyVideoConstraints({ advanced: [{ torch: lanternaLigada }] })
+    .then(() => {
+      document.getElementById('btnLanterna').classList.toggle('active', lanternaLigada);
+    })
+    .catch(() => {
+      lanternaLigada = !lanternaLigada;
+      toast('Não foi possível controlar a lanterna neste aparelho.', 'warn');
+    });
 }
 
 function onLeituraCameraSucesso(textoLido){
@@ -1885,6 +2033,7 @@ function onLeituraCameraSucesso(textoLido){
 }
 
 function pararCamera(){
+  lanternaLigada = false;
   if(html5QrInstance && cameraRunning){
     html5QrInstance.stop().then(() => {
       html5QrInstance.clear();
@@ -1900,6 +2049,7 @@ function fecharCamera(){
 
 btnCameraScan.addEventListener('click', abrirCamera);
 btnCloseCamera.addEventListener('click', fecharCamera);
+document.getElementById('btnLanterna').addEventListener('click', alternarLanterna);
 cameraModal.addEventListener('click', (e) => { if(e.target === cameraModal) fecharCamera(); });
 
 /* =========================================================
@@ -1976,6 +2126,261 @@ document.getElementById('btnClearBase').addEventListener('click', () => {
   saveBase();
   renderBase();
   toast('Base limpa.', 'warn');
+});
+
+/* =========================================================
+   MÍDIA POR PEDIDO (fotos e vídeo, salvos no IndexedDB)
+   ========================================================= */
+const MIDIA_MAX_FOTOS = 5;
+const MIDIA_MAX_VIDEO_SEG = 60;
+let midiaDb = null;
+let midiaRegistroAtualId = null;
+let midiaStream = null;
+let midiaRecorder = null;
+let midiaGravando = false;
+let midiaTimerInterval = null;
+let midiaSegundos = 0;
+
+function abrirMidiaDb(){
+  return new Promise((resolve, reject) => {
+    if(midiaDb){ resolve(midiaDb); return; }
+    const req = indexedDB.open('bipex_midia_db', 1);
+    req.onupgradeneeded = (e) => {
+      const db = e.target.result;
+      if(!db.objectStoreNames.contains('midias')){
+        const store = db.createObjectStore('midias', { keyPath: 'id', autoIncrement: true });
+        store.createIndex('porRegistro', 'registroId', { unique: false });
+      }
+    };
+    req.onsuccess = (e) => { midiaDb = e.target.result; resolve(midiaDb); };
+    req.onerror = (e) => reject(e);
+  });
+}
+
+function midiaListarPorRegistro(registroId){
+  return abrirMidiaDb().then(db => new Promise((resolve, reject) => {
+    const tx = db.transaction('midias', 'readonly');
+    const idx = tx.objectStore('midias').index('porRegistro');
+    const req = idx.getAll(registroId);
+    req.onsuccess = () => resolve(req.result || []);
+    req.onerror = (e) => reject(e);
+  }));
+}
+
+function midiaSalvar(registroId, tipo, blob){
+  return abrirMidiaDb().then(db => new Promise((resolve, reject) => {
+    const tx = db.transaction('midias', 'readwrite');
+    const req = tx.objectStore('midias').add({ registroId, tipo, blob, criadoEm: Date.now() });
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = (e) => reject(e);
+  }));
+}
+
+function midiaExcluir(itemId){
+  return abrirMidiaDb().then(db => new Promise((resolve, reject) => {
+    const tx = db.transaction('midias', 'readwrite');
+    const req = tx.objectStore('midias').delete(itemId);
+    req.onsuccess = () => resolve();
+    req.onerror = (e) => reject(e);
+  }));
+}
+
+function atualizarContadorMidia(registroId){
+  midiaListarPorRegistro(registroId).then(itens => {
+    const el = document.querySelector(`[data-midia-count="${registroId}"]`);
+    if(!el) return;
+    if(itens.length > 0){
+      el.textContent = itens.length;
+      el.classList.add('show');
+    }else{
+      el.textContent = '';
+      el.classList.remove('show');
+    }
+  }).catch(() => {});
+}
+
+function formatarTempoMidia(seg){
+  const m = String(Math.floor(seg/60)).padStart(2,'0');
+  const s = String(seg%60).padStart(2,'0');
+  return `${m}:${s}`;
+}
+
+function abrirModalMidia(registroId, idPedidoTexto){
+  midiaRegistroAtualId = registroId;
+  document.getElementById('midiaModalTitulo').textContent = `Fotos e vídeo — Pedido ${idPedidoTexto}`;
+  document.getElementById('midiaModal').classList.add('open');
+  renderGridMidia();
+}
+
+function fecharModalMidia(){
+  pararCameraMidia();
+  document.getElementById('midiaModal').classList.remove('open');
+  atualizarContadorMidia(midiaRegistroAtualId);
+  midiaRegistroAtualId = null;
+}
+
+function renderGridMidia(){
+  if(!midiaRegistroAtualId) return;
+  midiaListarPorRegistro(midiaRegistroAtualId).then(itens => {
+    const grid = document.getElementById('midiaGrid');
+    if(itens.length === 0){
+      grid.innerHTML = '<p class="midia-empty">Nenhuma foto ou vídeo salvo pra esse pedido ainda.</p>';
+      atualizarBotoesCapturaMidia(itens);
+      return;
+    }
+    grid.innerHTML = '';
+    itens.forEach(item => {
+      const url = URL.createObjectURL(item.blob);
+      const div = document.createElement('div');
+      div.className = 'midia-item';
+      if(item.tipo === 'foto'){
+        div.innerHTML = `<img src="${url}" alt="Foto">`;
+      }else{
+        div.innerHTML = `<video src="${url}" muted></video><span class="mi-tag">🎥 vídeo</span>`;
+      }
+      const actions = document.createElement('div');
+      actions.className = 'mi-actions';
+      const btnBaixar = document.createElement('button');
+      btnBaixar.textContent = '⬇️';
+      btnBaixar.title = 'Baixar';
+      btnBaixar.addEventListener('click', () => {
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `bipex_pedido_${midiaRegistroAtualId}_${item.tipo}_${item.id}.${item.tipo === 'foto' ? 'jpg' : 'webm'}`;
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      });
+      const btnDel = document.createElement('button');
+      btnDel.textContent = '🗑️';
+      btnDel.title = 'Excluir';
+      btnDel.addEventListener('click', () => {
+        if(!confirm('Excluir essa mídia?')) return;
+        midiaExcluir(item.id).then(() => renderGridMidia());
+      });
+      actions.appendChild(btnBaixar);
+      actions.appendChild(btnDel);
+      div.appendChild(actions);
+      grid.appendChild(div);
+    });
+    atualizarBotoesCapturaMidia(itens);
+  });
+}
+
+function atualizarBotoesCapturaMidia(itens){
+  const nFotos = itens.filter(i => i.tipo === 'foto').length;
+  const temVideo = itens.some(i => i.tipo === 'video');
+  const btnFoto = document.getElementById('btnTirarFoto');
+  const btnVideo = document.getElementById('btnGravarVideo');
+  if(btnFoto){
+    btnFoto.disabled = nFotos >= MIDIA_MAX_FOTOS;
+    btnFoto.style.opacity = nFotos >= MIDIA_MAX_FOTOS ? '.4' : '1';
+  }
+  if(btnVideo){
+    btnVideo.title = temVideo ? 'Gravar um novo vídeo (substitui o atual)' : 'Gravar vídeo';
+  }
+}
+
+function abrirCameraMidia(){
+  const wrap = document.getElementById('midiaLiveWrap');
+  const videoEl = document.getElementById('midiaLiveVideo');
+  navigator.mediaDevices.getUserMedia({
+    video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } },
+    audio: true
+  }).then(stream => {
+    midiaStream = stream;
+    videoEl.srcObject = stream;
+    wrap.classList.add('open');
+  }).catch(() => {
+    toast('Não foi possível acessar a câmera. Verifique a permissão do navegador.', 'error');
+  });
+}
+
+function pararCameraMidia(){
+  if(midiaGravando) pararGravacaoVideo();
+  if(midiaStream){
+    midiaStream.getTracks().forEach(t => t.stop());
+    midiaStream = null;
+  }
+  document.getElementById('midiaLiveWrap').classList.remove('open');
+}
+
+function tirarFotoMidia(){
+  if(!midiaStream || !midiaRegistroAtualId) return;
+  midiaListarPorRegistro(midiaRegistroAtualId).then(itens => {
+    const nFotos = itens.filter(i => i.tipo === 'foto').length;
+    if(nFotos >= MIDIA_MAX_FOTOS){ toast(`Máximo de ${MIDIA_MAX_FOTOS} fotos por pedido.`, 'warn'); return; }
+    const videoEl = document.getElementById('midiaLiveVideo');
+    const canvas = document.createElement('canvas');
+    canvas.width = videoEl.videoWidth;
+    canvas.height = videoEl.videoHeight;
+    canvas.getContext('2d').drawImage(videoEl, 0, 0);
+    canvas.toBlob(blob => {
+      if(!blob) return;
+      midiaSalvar(midiaRegistroAtualId, 'foto', blob).then(() => {
+        renderGridMidia();
+        toast('Foto salva!', 'success');
+        if(navigator.vibrate) navigator.vibrate(50);
+      });
+    }, 'image/jpeg', 0.85);
+  });
+}
+
+function escolherMimeTypeVideo(){
+  const candidatos = ['video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/webm', 'video/mp4'];
+  for(const tipo of candidatos){
+    if(window.MediaRecorder && MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(tipo)) return tipo;
+  }
+  return '';
+}
+
+function iniciarGravacaoVideo(){
+  if(!midiaStream || !midiaRegistroAtualId || midiaGravando) return;
+  const mimeType = escolherMimeTypeVideo();
+  try{
+    midiaRecorder = mimeType ? new MediaRecorder(midiaStream, { mimeType }) : new MediaRecorder(midiaStream);
+  }catch(e){
+    toast('Gravação de vídeo não é suportada neste navegador.', 'error');
+    return;
+  }
+  const chunks = [];
+  midiaRecorder.ondataavailable = (e) => { if(e.data && e.data.size > 0) chunks.push(e.data); };
+  midiaRecorder.onstop = () => {
+    const blob = new Blob(chunks, { type: mimeType || 'video/webm' });
+    midiaSalvar(midiaRegistroAtualId, 'video', blob).then(() => {
+      renderGridMidia();
+      toast('Vídeo salvo!', 'success');
+    });
+  };
+  midiaGravando = true;
+  midiaSegundos = 0;
+  const timerEl = document.getElementById('midiaTimer');
+  timerEl.textContent = formatarTempoMidia(0);
+  timerEl.classList.add('show');
+  document.getElementById('btnGravarVideo').classList.add('recording');
+  midiaTimerInterval = setInterval(() => {
+    midiaSegundos++;
+    timerEl.textContent = formatarTempoMidia(midiaSegundos);
+    if(midiaSegundos >= MIDIA_MAX_VIDEO_SEG) pararGravacaoVideo();
+  }, 1000);
+  midiaRecorder.start();
+}
+
+function pararGravacaoVideo(){
+  if(!midiaGravando) return;
+  midiaGravando = false;
+  clearInterval(midiaTimerInterval);
+  document.getElementById('midiaTimer').classList.remove('show');
+  document.getElementById('btnGravarVideo').classList.remove('recording');
+  if(midiaRecorder && midiaRecorder.state !== 'inactive') midiaRecorder.stop();
+}
+
+document.getElementById('btnAbrirCameraMidia').addEventListener('click', abrirCameraMidia);
+document.getElementById('btnCloseMidia').addEventListener('click', fecharModalMidia);
+document.getElementById('btnTirarFoto').addEventListener('click', tirarFotoMidia);
+document.getElementById('btnGravarVideo').addEventListener('click', () => {
+  if(midiaGravando) pararGravacaoVideo(); else iniciarGravacaoVideo();
+});
+document.getElementById('midiaModal').addEventListener('click', (e) => {
+  if(e.target.id === 'midiaModal') fecharModalMidia();
 });
 
 /* =========================================================
