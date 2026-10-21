@@ -1,0 +1,5 @@
+# Necessario para gerar imagens de verdade. Instale o torch conforme seu hardware (pytorch.org).
+torch
+diffusers
+transformers
+accelerate
